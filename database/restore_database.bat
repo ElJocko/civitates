@@ -1,0 +1,1 @@
+"%POSTGRESQL_HOME%\bin\psql" -U postgres civitates < database.sql

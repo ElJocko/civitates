@@ -1,0 +1,1 @@
+"%POSTGRESQL_HOME%\bin\dropdb" -U postgres civitates

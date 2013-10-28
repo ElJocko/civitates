@@ -1,0 +1,1 @@
+"%POSTGRESQL_HOME%\bin\createdb" -U postgres -T template0 civitates

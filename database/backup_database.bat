@@ -1,0 +1,1 @@
+"%POSTGRESQL_HOME%\bin\pg_dump" -U postgres civitates > database.sql
