@@ -1,0 +1,4 @@
+# Ignore the openlayers library.  It must be downloaded from openlayers.org for each installation.
+OpenLayers.js
+img/
+theme/

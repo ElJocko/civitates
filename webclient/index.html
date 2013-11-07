@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8' />
+ 	<title>My OpenLayers Map</title>
+    <script type='text/javascript' src="OpenLayers.js"></script>
+    <script type='text/javascript'>
+
+        var map;
+		var cityLayerId;
+		
+		function setYear(year, refresh) {
+			yearInt = parseInt(year);
+			if (yearInt > 0) {
+				yearLabel = year;
+				eraLabel = ' CE';
+			}
+			else {
+				yearLabel = Math.abs(yearInt).toString();
+				eraLabel = ' BCE';
+			}
+			document.getElementById('year').innerHTML = yearLabel + eraLabel;
+			
+			filter = new OpenLayers.Filter.Logical({
+				type: OpenLayers.Filter.Logical.AND,
+				filters: [
+					new OpenLayers.Filter.Comparison({
+						type: OpenLayers.Filter.Comparison.LESS_THAN,
+						property: "start_year",
+						value: year
+					}),
+					new OpenLayers.Filter.Comparison({
+						type: OpenLayers.Filter.Comparison.GREATER_THAN,
+						property: "end_year",
+						value: year
+					})
+					]
+			});
+			
+			var parser = new OpenLayers.Format.Filter.v1_1_0();
+			var filterAsXml = parser.write(filter);
+			var xml = new OpenLayers.Format.XML();
+			var filterAsString = xml.write(filterAsXml);
+			
+			var cityLayer = map.getLayer(cityLayerId);
+			cityLayer.params["FILTER"] = filterAsString;
+			
+			if (refresh) {
+				cityLayer.redraw();
+			}
+		}
+
+       function init() {
+           map = new OpenLayers.Map('map_element', {});
+           var wms = new OpenLayers.Layer.WMS(
+               'OpenLayers WMS',
+               'http://vmap0.tiles.osgeo.org/wms/vmap0',
+               {layers: 'basic'},
+               {isBaseLayer: true}
+           );
+		   
+           var baseLayer = new OpenLayers.Layer.WMS(
+               'base',
+               'http://localhost:8080/geoserver/history/wms',
+               {layers: 'NE2_HR_LC_SR_W_DR'},
+               {isBaseLayer: true}
+           );
+			
+           var cityLayer = new OpenLayers.Layer.WMS(
+               'city history',
+               'http://localhost:8080/geoserver/history/wms',
+               {layers: 'history:city_history', transparent: 'true'},
+               {singleTile: true, ratio: 1}
+           );
+		   cityLayerId = cityLayer.id;
+
+		   map.addLayer(cityLayer)
+           //map.addLayer(wms);
+		   map.addLayer(baseLayer);
+		   
+		   var year = "600";
+		   setYear(year, false);
+		   
+           if(!map.getCenter()){
+               map.setCenter(new OpenLayers.LonLat(40, 37), 4);
+           }
+       }
+	   
+	   function onSetYearClick() {
+			var year = document.getElementById('setYearInput').value;
+			setYear(year, true);
+		}
+
+    </script>
+</head>
+
+<body onload='init();'>
+	<div style='font-family:verdana,arial,sans-serif; font-size:18px; font-weight:bold; padding-bottom:12px;'>Year: <span id='year'></span></div>
+    <div id='map_element' style='width: 1000px; height: 700px;'></div>
+	<div  style='padding-top:12px;'>
+		<input type='text' id='setYearInput' />
+		<input type='button' id='setYearButton' value='Set Year' onClick='onSetYearClick()' />
+	</div>
+</body>
+</html>
